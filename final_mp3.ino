@@ -12,7 +12,7 @@ LiquidCrystal lcd(3, 2, A3, A2, A1, A0);
 char song[] = "2.WAV";
 File root;
 int pause_m = 1;
-char storage_array[100];
+char *storage_array[100];
 int x=0;
 
 byte Sound[8] = {
@@ -60,8 +60,8 @@ void setup() {
 void printArray(){
   int i = 0;
   while (i <= x) {
-    Serial.println(&storage_array[i]);
-    Serial.println(' ');
+    //Serial.println(storage_array[i]);
+    //Serial.println(' ');
     i++;
   }
 }
@@ -78,9 +78,10 @@ char* printDirectory(File dir, int numTabs) {
       for (uint32_t i = 0; i < numTabs; i++) {
       }
       char* filename = entry.name();
-      char* ext = &filename[strlen(filename)-4];
-      if(!strcmp(ext, array_wav)){
+      char* extension = &filename[strlen(filename)-4];
+      if(!strcmp(extension, array_wav)){ // we add ! because strcmp returns 0 on true
         storage_array[x]= filename;
+        Serial.println(storage_array[x]);
         x++;
       }
       if (entry.isDirectory()) {
@@ -88,7 +89,6 @@ char* printDirectory(File dir, int numTabs) {
          printDirectory(entry, numTabs + 1);
          x++;
       }
-      entry.close();
    }
 }
 
