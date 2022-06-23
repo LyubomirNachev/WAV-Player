@@ -1,6 +1,9 @@
-#include "SPI.h"
-#include "SD.h"
-#include "TMRpcm.h"
+#include <SPI.h>
+#include <SdFat.h>
+SdFat sd;
+#include <pcmConfig.h>
+#include <pcmRF.h>
+#include <TMRpcm.h>
 #include "LiquidCrystal.h"
 #define SCK 13
 #define MISO 12
@@ -10,10 +13,10 @@
 TMRpcm audiotmr;
 LiquidCrystal lcd(3, 2, A3, A2, A1, A0);
 char song[] = "2.WAV";
-File root;
 int pause_m = 1;
 char *storage_array[100];
 int x=0;
+
 
 byte Sound[8] = {
   0b00001,
@@ -43,53 +46,15 @@ void setup() {
   lcd.print(" WAV Player ");
   lcd.write(byte(5));
   Serial.begin(9600);
+  while (!Serial);
   audiotmr.speakerPin = Speaker;
-  if(!SD.begin(CS))
-  {
+  if(!sd.begin(CS)){
     Serial.println("SD failed");
-    return;
+    while(true);
   }
-  root = SD.open("/");
-  printDirectory(root, 0);
-  printArray();
+  sd.ls("/", LS_R);
   play();
   audiotmr.pause();
-
-}
-
-void printArray(){
-  int i = 0;
-  while (i <= x) {
-    //Serial.println(storage_array[i]);
-    //Serial.println(' ');
-    i++;
-  }
-}
-
-
-char* printDirectory(File dir, int numTabs) {
-  char* array_wav = ".WAV";
-  while (true) {
-      File entry = dir.openNextFile();
-      if (! entry) {
-         // no more files
-         break;
-      }
-      for (uint32_t i = 0; i < numTabs; i++) {
-      }
-      char* filename = entry.name();
-      char* extension = &filename[strlen(filename)-4];
-      if(!strcmp(extension, array_wav)){ // we add ! because strcmp returns 0 on true
-        storage_array[x]= filename;
-        Serial.println(storage_array[x]);
-        x++;
-      }
-      if (entry.isDirectory()) {
-         storage_array[x] = "/";
-         printDirectory(entry, numTabs + 1);
-         x++;
-      }
-   }
 }
 
 void play()
@@ -104,6 +69,7 @@ void play()
 void loop() {
   int value = analogRead(A4);
   int Volume = analogRead(A5);
+  Serial.println(digitalRead(9));
   
   //Buttons
   //Serial.println("Button:");
