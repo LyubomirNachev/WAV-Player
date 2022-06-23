@@ -1,6 +1,5 @@
 #include <SPI.h>
 #include <SdFat.h>
-SdFat sd;
 #include <pcmConfig.h>
 #include <pcmRF.h>
 #include <TMRpcm.h>
@@ -12,11 +11,12 @@ SdFat sd;
 #define Speaker 9
 TMRpcm audiotmr;
 LiquidCrystal lcd(3, 2, A3, A2, A1, A0);
-char song[] = "2.WAV";
 int pause_m = 1;
-char *storage_array[100];
 int x=0;
-
+char* music[] = {"elsys.wav", "Little Dark Age.wav", "Meow Meow.wav", "North Memphis.wav", "Radiohead - Creep.wav", "Zyzz.wav", "Molchat Doma - Sudno.wav", "Jaba.wav", "Million theme.wav", "System Of A Down BYOB.wav", "kokosha glava homoseks.wav", "Straight to Hell.wav", "MBT Polov Jivot.wav", "Rammstein - Du Hast.wav", "Otlichen6-Nightcore.wav", "kokosha glava magazin.wav"};
+SdFat sd;
+int i;
+//char song = music[x];
 
 byte Sound[8] = {
   0b00001,
@@ -52,30 +52,22 @@ void setup() {
     Serial.println("SD failed");
     while(true);
   }
-  sd.ls("/", LS_R);
-  play();
+  for(i = 0; i < sizeof(music)/sizeof(music[0]);i++){
+    Serial.println(music[i]);  
+  }
+  Serial.println(i);
   audiotmr.pause();
 }
-
-void play()
-{
-  audiotmr.play(song);
-  
-  delay(100);
-  return;
-}
-
-
 void loop() {
   int value = analogRead(A4);
   int Volume = analogRead(A5);
-  Serial.println(digitalRead(9));
   
   //Buttons
   //Serial.println("Button:");
   //Serial.println(value);
   
   if (value > 850 && value < 1000) {
+    //PAUSE
     if (pause_m == 0){
       audiotmr.pause();
       lcd.setCursor(0, 1);
@@ -88,19 +80,34 @@ void loop() {
       pause_m = 0;
     } 
   } else if (value > 810 && value < 850) {
+    //NEXT
+    if(x==i){
+      x = -1;
+    };
+    x++;
     lcd.clear();
-    lcd.print("Button2");
+    lcd.print(music[x]);
+    audiotmr.play(music[x]);
   } else if (value > 740 && value < 810) {
+    //LOOP
     lcd.clear();
     lcd.print("Button3");
   } else if (value > 600 && value < 740) {
+    //PREV
+    if(x==0){
+      x = i;
+    };
+    x--;
     lcd.clear();
-    lcd.print("Button4");
+    lcd.print(music[x]);
+    audiotmr.play(music[x]);
   } else if (value > 450 && value < 600) {
+    //SHUFFLE
+    x = rand() % i;
     lcd.clear();
-    lcd.print("Button5");
+    lcd.print(music[x]);
+    audiotmr.play(music[x]);
   } else if (value < 450) {
-    Serial.println(audiotmr.isPlaying());
     lcd.clear();
     lcd.print("Button6");
   }
