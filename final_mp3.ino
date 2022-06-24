@@ -11,7 +11,8 @@
 #define Speaker 9
 TMRpcm audiotmr;
 LiquidCrystal lcd(3, 2, A3, A2, A1, A0);
-int pause_m = 1;
+int pause_m = 0;
+int loop_m = 0;
 int x=0;
 char* music[] = {"elsys.wav", "Little Dark Age.wav", "Meow Meow.wav", "North Memphis.wav", "Radiohead - Creep.wav", "Zyzz.wav", "Molchat Doma - Sudno.wav", "Jaba.wav", "Million theme.wav", "System Of A Down BYOB.wav", "kokosha glava homoseks.wav", "Straight to Hell.wav", "MBT Polov Jivot.wav", "Rammstein - Du Hast.wav", "Otlichen6-Nightcore.wav", "kokosha glava magazin.wav"};
 SdFat sd;
@@ -89,9 +90,17 @@ void loop() {
     lcd.print(music[x]);
     audiotmr.play(music[x]);
   } else if (value > 740 && value < 810) {
-    //LOOP
-    lcd.clear();
-    lcd.print("Button3");
+       if (loop_m == 1){
+        loop_m = 0;
+        audiotmr.loop(loop_m);
+        lcd.setCursor(0, 1);
+        lcd.print("     ");
+      }else{
+        loop_m = 1;
+        audiotmr.loop(loop_m);
+        lcd.setCursor(0,1);
+        lcd.print("Loop");
+      } 
   } else if (value > 600 && value < 740) {
     //PREV
     if(x==0){
